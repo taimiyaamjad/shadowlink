@@ -7,7 +7,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen overflow-x-hidden">
       <LandingHeader />
       <main className="flex-1">
         <section className="relative w-full h-[80vh] md:h-screen flex items-center justify-center">
@@ -83,7 +83,7 @@ export default function Home() {
                 </p>
               </div>
             </div>
-            <div className="mx-auto grid max-w-5xl items-start gap-8 py-12 sm:grid-cols-2 md:gap-12 lg:grid-cols-3">
+            <div className="grid max-w-5xl mx-auto items-start gap-8 py-12 sm:grid-cols-2 md:gap-12 lg:grid-cols-3">
               <div className="grid gap-1 text-center animate-in slide-in-from-bottom" style={{ animationDelay: '0.5s' }}>
                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
                   <BrainCircuit className="h-8 w-8" />
@@ -126,7 +126,7 @@ export default function Home() {
                 </p>
               </div>
             </div>
-            <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:grid-cols-3 lg:gap-12">
+            <div className="grid max-w-5xl mx-auto items-center gap-6 py-12 lg:grid-cols-3 lg:gap-12">
               <div className="grid gap-1 text-center">
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
                   <UserPlus className="h-8 w-8" />
