@@ -16,7 +16,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
     if (!loading && !user) {
       router.replace("/login");
     }
-  }, [user, loading, router, pathname]);
+  }, [user, loading, router]);
 
   if (loading || !user || !app) { // Check for app initialization
     return (
