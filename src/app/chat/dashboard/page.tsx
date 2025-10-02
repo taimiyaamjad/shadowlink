@@ -1,12 +1,12 @@
 "use client";
 
-import { BarChart, LineChart, PieChart } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useAuth } from '@/hooks/use-auth';
+import { getDashboardData } from '@/app/actions/dashboard';
+import { BarChart, LineChart, PieChart, MessageSquarePlus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@/components/ui/chart';
+import { Button } from '@/components/ui/button';
 import {
   Bar,
   BarChart as RechartsBarChart,
@@ -21,6 +21,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const chartData = [
   { month: 'January', desktop: 186, mobile: 80 },
@@ -39,10 +40,31 @@ const pieData = [
 ];
 
 export default function DashboardPage() {
+    const { user } = useAuth();
+    const [dashboardData, setDashboardData] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (user) {
+            getDashboardData(user.uid)
+                .then(data => {
+                    setDashboardData(data);
+                    setLoading(false);
+                })
+                .catch(console.error);
+        }
+    }, [user]);
+
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight font-headline">Dashboard</h2>
+        <Button asChild>
+            <Link href="/chat">
+                <MessageSquarePlus className="mr-2 h-4 w-4" />
+                New Chat
+            </Link>
+        </Button>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
@@ -51,36 +73,30 @@ export default function DashboardPage() {
             <BarChart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,234</div>
-            <p className="text-xs text-muted-foreground">
-              +20.1% from last month
-            </p>
+            {loading ? <Skeleton className="h-8 w-24" /> : <div className="text-2xl font-bold">{dashboardData?.totalMessages || 0}</div>}
+            {loading ? <Skeleton className="h-4 w-40 mt-1" /> : <p className="text-xs text-muted-foreground">All time</p>}
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Positive Sentiment
+              AI Messages
             </CardTitle>
             <LineChart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">82%</div>
-            <p className="text-xs text-muted-foreground">
-              +5% from last month
-            </p>
+            {loading ? <Skeleton className="h-8 w-24" /> : <div className="text-2xl font-bold">{dashboardData?.aiMessages || 0}</div>}
+            {loading ? <Skeleton className="h-4 w-40 mt-1" /> : <p className="text-xs text-muted-foreground">All time</p>}
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg. Response Time</CardTitle>
+            <CardTitle className="text-sm font-medium">User Messages</CardTitle>
             <PieChart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3.2s</div>
-            <p className="text-xs text-muted-foreground">
-              -0.5s from last month
-            </p>
+            {loading ? <Skeleton className="h-8 w-24" /> : <div className="text-2xl font-bold">{dashboardData?.userMessages || 0}</div>}
+            {loading ? <Skeleton className="h-4 w-40 mt-1" /> : <p className="text-xs text-muted-foreground">All time</p>}
           </CardContent>
         </Card>
          <Card>
@@ -89,23 +105,22 @@ export default function DashboardPage() {
             <BarChart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">42</div>
-            <p className="text-xs text-muted-foreground">
-              +10 from last week
-            </p>
+             {loading ? <Skeleton className="h-8 w-24" /> : <div className="text-2xl font-bold">{dashboardData?.totalConversations || 0}</div>}
+            {loading ? <Skeleton className="h-4 w-40 mt-1" /> : <p className="text-xs text-muted-foreground">Total conversations started</p>}
           </CardContent>
         </Card>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="lg:col-span-4">
           <CardHeader>
-            <CardTitle>Message Volume</CardTitle>
+            <CardTitle>Message Volume (Last 7 Days)</CardTitle>
           </CardHeader>
           <CardContent className="pl-2">
+            {loading ? <Skeleton className="h-[350px] w-full" /> : (
             <ResponsiveContainer width="100%" height={350}>
-                <RechartsLineChart data={chartData}>
-                    <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                <RechartsBarChart data={dashboardData?.messageVolume || []}>
+                    <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false}/>
                     <Tooltip
                       content={({ active, payload }) => {
                         if (active && payload && payload.length) {
@@ -114,7 +129,7 @@ export default function DashboardPage() {
                               <div className="grid grid-cols-2 gap-2">
                                 <div className="flex flex-col">
                                   <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                    Desktop
+                                    User
                                   </span>
                                   <span className="font-bold text-muted-foreground">
                                     {payload[0].value}
@@ -122,7 +137,7 @@ export default function DashboardPage() {
                                 </div>
                                 <div className="flex flex-col">
                                   <span className="text-[0.70rem] uppercase text-muted-foreground">
-                                    Mobile
+                                    AI
                                   </span>
                                   <span className="font-bold">
                                     {payload[1].value}
@@ -136,21 +151,23 @@ export default function DashboardPage() {
                       }}
                     />
                     <Legend />
-                    <Line type="monotone" dataKey="desktop" stroke="hsl(var(--primary))" dot={false} strokeWidth={2} />
-                    <Line type="monotone" dataKey="mobile" stroke="hsl(var(--accent))" dot={false} strokeWidth={2} />
-                </RechartsLineChart>
+                    <Bar dataKey="user" stackId="a" fill="hsl(var(--primary))" name="User" />
+                    <Bar dataKey="ai" stackId="a" fill="hsl(var(--accent))" name="AI" />
+                </RechartsBarChart>
             </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
         <Card className="lg:col-span-3">
           <CardHeader>
-            <CardTitle>Traffic Source</CardTitle>
+            <CardTitle>Message Distribution</CardTitle>
           </CardHeader>
           <CardContent>
+            {loading ? <Skeleton className="h-[350px] w-full" /> : (
              <ResponsiveContainer width="100%" height={350}>
                 <RechartsPieChart>
                     <Pie
-                        data={pieData}
+                        data={dashboardData?.messageDistribution || []}
                         cx="50%"
                         cy="50%"
                         labelLine={false}
@@ -158,13 +175,14 @@ export default function DashboardPage() {
                         dataKey="value"
                         label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                     >
-                        {pieData.map((entry, index) => (
+                        {(dashboardData?.messageDistribution || []).map((entry: any, index: number) => (
                             <Cell key={`cell-${index}`} fill={entry.fill} />
                         ))}
                     </Pie>
                     <Tooltip />
                 </RechartsPieChart>
             </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
       </div>

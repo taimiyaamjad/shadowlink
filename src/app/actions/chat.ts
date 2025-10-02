@@ -12,10 +12,11 @@ import {
   where,
   limit,
   orderBy,
+  getDoc,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { revalidatePath } from "next/cache";
-import type { Message } from "@/lib/types";
+import type { Message, Conversation } from "@/lib/types";
 
 // IMPORTANT: The following GenAI flow imports are available because they
 // have been pre-built by another process.
@@ -34,9 +35,8 @@ import { generateChatResponse } from "@/ai/flows/generate-chat-response";
  */
 export async function sendMessage(
   uid: string,
-  conversationId: string, // This will be used to fetch conversation history
-  messageText: string,
-  currentMessages: Message[]
+  conversationId: string | null,
+  messageText: string
 ) {
   if (!uid) {
     return { success: false, error: "User is not authenticated." };
@@ -46,47 +46,93 @@ export async function sendMessage(
   }
 
   try {
-    const conversationHistory = currentMessages
-      .map((msg) => `${msg.sender}: ${msg.text}`)
-      .join("\n");
+    let currentConversationId = conversationId;
+    let conversationHistory = "";
+    
+    // If we have a conversationId, fetch it. Otherwise, we'll create a new one.
+    if (currentConversationId) {
+      const convDoc = await getDoc(doc(db, "conversations", currentConversationId));
+      if (convDoc.exists()) {
+        const conversation = convDoc.data() as Conversation;
+        conversationHistory = conversation.messages
+          .map((msg) => `${msg.sender}: ${msg.text}`)
+          .join("\n");
+      } else {
+        // Conversation doesn't exist, so we create a new one
+        currentConversationId = null; 
+      }
+    }
 
     const aiResponse = await generateChatResponse({
-      conversationHistory,
+      conversationHistory: conversationHistory,
       latestMessage: messageText,
     });
     
     const aiResponseText = aiResponse.response;
 
-    // This is where you would persist the messages to Firestore
-    // For now, we are just returning the AI response to the client
-    // which manages the message list in its state.
-    
-    // In a real app, conversation management would be more robust.
-    // For now, we are just simulating the interaction.
-    // const conversationRef = doc(db, 'conversations', conversationId);
-    
-    const userMessage = {
+    const userMessage: Omit<Message, 'id'> = {
         text: messageText,
         sender: 'user',
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp() as any
     };
     
-    // await updateDoc(conversationRef, { messages: arrayUnion(userMessage) });
-
-    const aiMessage = {
+    const aiMessage: Omit<Message, 'id'> = {
         text: aiResponseText,
         sender: 'ai',
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp() as any
     };
 
-    // await updateDoc(conversationRef, { messages: arrayUnion(aiMessage) });
+    if (currentConversationId) {
+      const conversationRef = doc(db, 'conversations', currentConversationId);
+      await updateDoc(conversationRef, {
+        messages: arrayUnion(userMessage, aiMessage),
+        lastMessageAt: serverTimestamp()
+      });
+    } else {
+      const newConversationRef = await addDoc(collection(db, 'conversations'), {
+        userId: uid,
+        createdAt: serverTimestamp(),
+        lastMessageAt: serverTimestamp(),
+        messages: [userMessage, aiMessage]
+      });
+      currentConversationId = newConversationRef.id;
+    }
 
-    // Since we aren't using a real conversationId yet, we can't revalidate a specific path
-    // revalidatePath(`/chat/${conversationId}`);
+    revalidatePath(`/chat/${currentConversationId}`);
+    revalidatePath(`/chat/dashboard`);
 
-    return { success: true, aiResponse: aiResponseText };
+    return { success: true, aiResponse: aiResponseText, conversationId: currentConversationId };
   } catch (error) {
     console.error("Error sending message:", error);
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+    return { success: false, error: errorMessage };
+  }
+}
+
+
+export async function getConversations(uid: string) {
+  if (!uid) {
+    return { success: false, error: "User is not authenticated." };
+  }
+  try {
+    const q = query(
+      collection(db, "conversations"),
+      where("userId", "==", uid),
+      orderBy("lastMessageAt", "desc"),
+      limit(20)
+    );
+    const querySnapshot = await getDocs(q);
+    const conversations = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        const lastMessage = data.messages[data.messages.length - 1];
+        return {
+            id: doc.id,
+            title: lastMessage?.text.substring(0, 30) + '...' || 'New Conversation',
+        }
+    });
+    return { success: true, conversations };
+  } catch (error) {
+    console.error("Error fetching conversations:", error);
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
     return { success: false, error: errorMessage };
   }

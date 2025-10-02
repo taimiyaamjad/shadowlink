@@ -12,6 +12,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Send, User, Bot } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ShadowLinkLogo } from "./icons";
+import { useParams, useRouter } from "next/navigation";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export function ChatArea() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -20,6 +23,10 @@ export function ChatArea() {
   const { user } = useAuth();
   const { toast } = useToast();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const params = useParams();
+  const router = useRouter();
+
+  const conversationId = params.id as string | undefined;
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -27,34 +34,50 @@ export function ChatArea() {
     }
   }, [messages]);
 
+  useEffect(() => {
+    if (conversationId) {
+      const unsub = onSnapshot(doc(db, "conversations", conversationId), (doc) => {
+        if (doc.exists()) {
+          const data = doc.data();
+          setMessages(data.messages || []);
+        } else {
+          // If conversation doesn't exist, maybe redirect or show an error
+          toast({ variant: 'destructive', title: 'Error', description: 'Conversation not found.' });
+          router.push('/chat/dashboard');
+        }
+      });
+      return () => unsub();
+    } else {
+        setMessages([]);
+    }
+  }, [conversationId, router, toast]);
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || !user) return;
 
+    const tempUserMessageId = Date.now().toString();
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: tempUserMessageId,
       text: input,
       sender: "user",
       createdAt: new Date() as any, // Temporary client-side timestamp
     };
     
-    const newMessages = [...messages, userMessage];
-    setMessages(newMessages);
+    // Optimistically update UI
+    setMessages((prev) => [...prev, userMessage]);
+    const currentInput = input;
     setInput("");
     setIsLoading(true);
     
     try {
-      // In a real app, you would pass a conversation ID here
-      const result = await sendMessage(user.uid, "temp_conversation_id", input, newMessages);
+      const result = await sendMessage(user.uid, conversationId || null, currentInput);
 
-      if (result.success && result.aiResponse) {
-        const aiMessage: Message = {
-            id: Date.now().toString() + "-ai",
-            text: result.aiResponse,
-            sender: "ai",
-            createdAt: new Date() as any,
+      if (result.success && result.conversationId) {
+        // If it's a new conversation, redirect to the new URL
+        if (!conversationId) {
+          router.push(`/chat/${result.conversationId}`);
         }
-        setMessages((prev) => [...prev, aiMessage]);
       } else {
         throw new Error(result.error || "Failed to get AI response.");
       }
@@ -64,17 +87,19 @@ export function ChatArea() {
         title: "Error",
         description: (error as Error).message,
       });
-      // Optional: remove the user's message if sending failed
-      setMessages(prev => prev.slice(0, prev.length - 1));
+      // Revert optimistic update
+      setMessages(prev => prev.filter(m => m.id !== tempUserMessageId));
     } finally {
         setIsLoading(false);
     }
   };
+  
+  const isNewChat = !conversationId;
 
   return (
     <div className="flex-1 flex flex-col h-full p-4 gap-4">
       <div ref={scrollAreaRef} className="flex-1 overflow-y-auto pr-4">
-        {messages.length === 0 ? (
+        {messages.length === 0 && isNewChat ? (
           <div className="flex h-full flex-col items-center justify-center text-center">
             <ShadowLinkLogo className="h-16 w-16 text-muted-foreground/50" />
             <h2 className="mt-4 text-2xl font-semibold font-headline">
@@ -86,9 +111,9 @@ export function ChatArea() {
           </div>
         ) : (
           <div className="space-y-6">
-            {messages.map((message) => (
+            {messages.map((message, index) => (
               <div
-                key={message.id}
+                key={message.id || index}
                 className={`flex items-start gap-4 ${
                   message.sender === "user" ? "justify-end" : ""
                 }`}
