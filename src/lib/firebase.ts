@@ -3,12 +3,12 @@ import { getAuth, Auth } from "firebase/auth";
 import { getFirestore, Firestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyA_...REPLACE_WITH_YOUR_KEY",
-  authDomain: "your-project-id.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project-id.appspot.com",
-  messagingSenderId: "123456789012",
-  appId: "1:123456789012:web:abcdef1234567890abcdef",
+  apiKey: "AIzaSyAKuab2rXjqxRLfryb1BWo7vZtqou_oUsI",
+  authDomain: "studio-7323600193-a0601.firebaseapp.com",
+  projectId: "studio-7323600193-a0601",
+  storageBucket: "studio-7323600193-a0601.appspot.com",
+  messagingSenderId: "228477398831",
+  appId: "1:228477398831:web:76f176d3dce113988abbda",
 };
 
 function getFirebaseInstances() {
