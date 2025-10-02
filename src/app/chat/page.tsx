@@ -1,11 +1,7 @@
 "use client";
 
-import { ChatArea } from "@/components/chat-area";
+import { redirect } from 'next/navigation';
 
 export default function ChatPage() {
-  return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-        <ChatArea />
-    </div>
-  );
+  redirect('/chat/dashboard');
 }

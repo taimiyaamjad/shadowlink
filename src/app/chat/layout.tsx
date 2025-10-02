@@ -1,14 +1,16 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { ChatSidebar } from "@/components/chat-sidebar";
 import { Loader2 } from "lucide-react";
+import { ChatArea } from "@/components/chat-area";
 
 export default function ChatLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -23,11 +25,15 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
       </div>
     );
   }
+  
+  const isChatPage = pathname === '/chat';
 
   return (
     <div className="flex h-screen bg-background">
       <ChatSidebar user={user} />
-      <main className="flex-1 flex flex-col">{children}</main>
+      <main className="flex-1 flex flex-col">
+        {isChatPage ? <ChatArea /> : children}
+      </main>
     </div>
   );
 }

@@ -13,10 +13,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, MessageSquarePlus, ChevronDown, Loader2, BookCopy } from "lucide-react";
+import { LogOut, MessageSquarePlus, ChevronDown, Loader2, BookCopy, LayoutDashboard } from "lucide-react";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
+import Link from "next/link";
 
 type ChatSidebarProps = {
   user: FirebaseUser;
@@ -53,9 +54,20 @@ export function ChatSidebar({ user }: ChatSidebarProps) {
   return (
     <aside className="w-72 flex-col border-r bg-card/80 p-4 hidden md:flex">
       <div className="flex-1 overflow-y-auto">
-        <Button className="w-full justify-between" variant="outline">
-          New Chat <MessageSquarePlus className="h-4 w-4" />
-        </Button>
+        <div className="space-y-2">
+            <Button asChild className="w-full justify-start gap-2" variant="outline">
+              <Link href="/chat/dashboard">
+                <LayoutDashboard className="h-4 w-4" />
+                Dashboard
+              </Link>
+            </Button>
+            <Button asChild className="w-full justify-start gap-2">
+              <Link href="/chat">
+                <MessageSquarePlus className="h-4 w-4" />
+                New Chat
+              </Link>
+            </Button>
+        </div>
 
         <nav className="mt-6">
           <h2 className="text-xs font-semibold text-muted-foreground tracking-wider uppercase mb-2">History</h2>
