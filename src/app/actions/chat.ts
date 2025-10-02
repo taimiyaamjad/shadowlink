@@ -129,8 +129,15 @@ export async function sendMessage(
       await setDoc(newConversationRef, newConversationData);
     }
 
-    revalidatePath(`/chat/${currentConversationId}`);
-    revalidatePath(`/chat/dashboard`);
+    // Instead of revalidating, we will let the client-side subscription handle updates.
+    // This makes the UI feel faster.
+    // revalidatePath(`/chat/${currentConversationId}`);
+    // revalidatePath(`/chat/dashboard`);
+
+    if (!conversationId) {
+      router.push(`/chat/${currentConversationId}`);
+    }
+
 
     return { success: true, aiResponse: aiResponseText, conversationId: currentConversationId };
   } catch (error) {
@@ -150,6 +157,7 @@ export async function getConversations(uid: string) {
     return { success: false, error: "Database is not initialized." };
   }
   try {
+    // Only filter by userId. Sorting will be done in the action.
     const q = query(
       collection(db, "conversations"),
       where("userId", "==", uid)
@@ -163,7 +171,7 @@ export async function getConversations(uid: string) {
         }
     });
 
-    // Sort conversations by lastMessageAt descending
+    // Sort conversations by lastMessageAt descending on the server.
     conversations.sort((a, b) => {
         const timeA = a.lastMessageAt?.toMillis() || 0;
         const timeB = b.lastMessageAt?.toMillis() || 0;
@@ -171,7 +179,7 @@ export async function getConversations(uid: string) {
     });
 
     const formattedConversations = conversations.slice(0, 20).map(conv => {
-        const lastMessage = conv.messages[conv.messages.length - 1];
+        const lastMessage = conv.messages && conv.messages.length > 0 ? conv.messages[conv.messages.length - 1] : null;
         return {
              id: conv.id,
              title: lastMessage?.text.substring(0, 30) + '...' || 'New Conversation',
