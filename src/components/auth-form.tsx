@@ -81,7 +81,7 @@ export function AuthForm({ mode }: AuthFormProps) {
     if (mode === "signup") {
       await createUserInFirestore(user.uid, user.email, user.displayName, user.photoURL);
     }
-    router.push("/chat");
+    router.push("/chat/dashboard");
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {

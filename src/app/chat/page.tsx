@@ -1,7 +1,7 @@
 "use client";
 
-import { redirect } from 'next/navigation';
+import { ChatArea } from "@/components/chat-area";
 
 export default function ChatPage() {
-  redirect('/chat/dashboard');
+  return <ChatArea />;
 }
