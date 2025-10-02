@@ -12,17 +12,42 @@ export function LandingHeader() {
             ShadowLink
           </span>
         </Link>
-        <nav className="hidden items-center gap-4 md:flex">
-          <Button variant="ghost" asChild>
-            <Link href="/login">Log In</Link>
-          </Button>
-          <Button asChild className="bg-primary hover:bg-primary/90">
-            <Link href="/signup">Sign Up</Link>
-          </Button>
+        <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
+          <Link
+            href="#features"
+            className="text-foreground/60 transition-colors hover:text-foreground/80"
+            prefetch={false}
+          >
+            Features
+          </Link>
+          <Link
+            href="#how-it-works"
+            className="text-foreground/60 transition-colors hover:text-foreground/80"
+            prefetch={false}
+          >
+            How It Works
+          </Link>
+          <Link
+            href="#faq"
+            className="text-foreground/60 transition-colors hover:text-foreground/80"
+            prefetch={false}
+          >
+            FAQs
+          </Link>
+           <Link
+            href="#contact"
+            className="text-foreground/60 transition-colors hover:text-foreground/80"
+            prefetch={false}
+          >
+            Contact
+          </Link>
         </nav>
-        <div className="md:hidden">
-            <Button variant="outline" asChild>
-                <Link href="/login">Get Started</Link>
+        <div className="flex items-center gap-4">
+            <Button variant="ghost" asChild className="hidden sm:inline-flex">
+                <Link href="/login">Log In</Link>
+            </Button>
+            <Button asChild className="bg-primary hover:bg-primary/90">
+                <Link href="/signup">Sign Up</Link>
             </Button>
         </div>
       </div>

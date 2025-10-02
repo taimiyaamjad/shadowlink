@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LandingHeader } from "@/components/landing-header";
-import { MessageCircle, BrainCircuit, BookCopy } from "lucide-react";
+import { MessageCircle, BrainCircuit, BookCopy, UserPlus, Rocket, Mail, ChevronRight } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 export default function Home() {
   return (
@@ -113,9 +114,148 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        <section id="how-it-works" className="w-full py-12 md:py-24 lg:py-32">
+          <div className="container px-4 md:px-6">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              <div className="space-y-2">
+                <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">How It Works</div>
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl font-headline">Get Started in 3 Easy Steps</h2>
+                <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                  Creating your digital twin is a simple and intuitive process.
+                </p>
+              </div>
+            </div>
+            <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:grid-cols-3 lg:gap-12">
+              <div className="grid gap-1 text-center">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+                  <UserPlus className="h-8 w-8" />
+                </div>
+                <h3 className="text-lg font-bold font-headline">1. Sign Up & Describe</h3>
+                <p className="text-sm text-muted-foreground">
+                  Create your account and give the AI a starting point by describing the personality you want it to adopt.
+                </p>
+              </div>
+              <div className="grid gap-1 text-center">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+                  <MessageCircle className="h-8 w-8" />
+                </div>
+                <h3 className="text-lg font-bold font-headline">2. Chat & Train</h3>
+                <p className="text-sm text-muted-foreground">
+                  Start chatting with your AI. Every interaction helps it learn your style, making it a more accurate reflection of you.
+                </p>
+              </div>
+              <div className="grid gap-1 text-center">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
+                  <Rocket className="h-8 w-8" />
+                </div>
+                <h3 className="text-lg font-bold font-headline">3. Unleash Your Twin</h3>
+                <p className="text-sm text-muted-foreground">
+                  Once trained, your AI is ready to chat on your behalf, answer questions, or even brainstorm ideas, all in your unique voice.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="faq" className="w-full py-12 md:py-24 lg:py-32 bg-background/80">
+          <div className="container px-4 md:px-6">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center">
+              <div className="space-y-2">
+                <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">FAQs</div>
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl font-headline">Frequently Asked Questions</h2>
+                <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                  Have questions? We've got answers. Here are some of the most common questions we get.
+                </p>
+              </div>
+            </div>
+            <div className="mx-auto max-w-3xl w-full py-12">
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="item-1">
+                  <AccordionTrigger>What is ShadowLink?</AccordionTrigger>
+                  <AccordionContent>
+                    ShadowLink is an AI-powered platform that creates a digital version of you. By analyzing your communication style, it builds an AI that can interact with others just as you would.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="item-2">
+                  <AccordionTrigger>How does the AI learn my personality?</AccordionTrigger>
+                  <AccordionContent>
+                    The AI learns through your conversations. The more you chat with it, the more data it has to analyze your writing style, tone, common phrases, and response patterns. This data is used to build a model that mimics your personality.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="item-3">
+                  <AccordionTrigger>Is my data secure?</AccordionTrigger>
+                  <AccordionContent>
+                    Yes, absolutely. We take data privacy and security very seriously. All your conversations are stored securely and are only used for the purpose of training your personal AI. We do not share your data with third parties.
+                  </AccordionContent>
+                </AccordionItem>
+                 <AccordionItem value="item-4">
+                  <AccordionTrigger>Can I use my AI for anything?</AccordionTrigger>
+                  <AccordionContent>
+                    You can use your AI for a wide range of tasks, including responding to messages, drafting emails, brainstorming ideas, and more. It's designed to be your personal digital assistant and doppelgänger.
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
+          </div>
+        </section>
+
+        <section id="contact" className="w-full py-12 md:py-24 lg:py-32">
+            <div className="container px-4 md:px-6">
+                 <div className="grid gap-10 lg:grid-cols-2">
+                    <div className="space-y-4">
+                         <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">Contact</div>
+                        <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl font-headline">Get in Touch</h2>
+                        <p className="max-w-[600px] text-muted-foreground md:text-xl/relaxed">
+                            Have a question, feedback, or a partnership inquiry? We'd love to hear from you.
+                        </p>
+                    </div>
+                    <div className="flex items-center justify-center">
+                        <Card className="w-full max-w-md glass-card">
+                            <CardHeader>
+                                <CardTitle>Contact Us</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-4">
+                                     <div className="flex items-center gap-4">
+                                        <Mail className="h-6 w-6 text-primary" />
+                                        <div className="flex-1">
+                                            <p className="font-semibold">Email</p>
+                                            <a href="mailto:contact@shadowlink.ai" className="text-muted-foreground hover:text-foreground">
+                                                contact@shadowlink.ai
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <Button asChild className="w-full" variant="outline">
+                                        <a href="mailto:contact@shadowlink.ai">
+                                            Send us an email <ChevronRight className="ml-2 h-4 w-4"/>
+                                        </a>
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </div>
+            </div>
+        </section>
+
       </main>
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
         <p className="text-xs text-muted-foreground">&copy; 2024 ShadowLink. All rights reserved.</p>
+        <nav className="sm:ml-auto flex gap-4 sm:gap-6">
+          <Link href="#features" className="text-xs hover:underline underline-offset-4" prefetch={false}>
+            Features
+          </Link>
+          <Link href="#how-it-works" className="text-xs hover:underline underline-offset-4" prefetch={false}>
+            How It Works
+          </Link>
+          <Link href="#faq" className="text-xs hover:underline underline-offset-4" prefetch={false}>
+            FAQs
+          </Link>
+          <Link href="#contact" className="text-xs hover:underline underline-offset-4" prefetch={false}>
+            Contact
+          </Link>
+        </nav>
       </footer>
     </div>
   );
