@@ -44,7 +44,7 @@ export function ChatSidebar({ user }: ChatSidebarProps) {
   const [loadingHistory, setLoadingHistory] = useState(true);
 
   useEffect(() => {
-    if (user) {
+    if (user && db) { // Check for db initialization
         setLoadingHistory(true);
         getConversations(user.uid).then(result => {
             if(result.success && result.conversations) {
@@ -55,7 +55,7 @@ export function ChatSidebar({ user }: ChatSidebarProps) {
             setLoadingHistory(false);
         })
     }
-  }, [user, pathname]);
+  }, [user, pathname, db]); // Add db to dependency array
 
 
   const handleLogout = async () => {

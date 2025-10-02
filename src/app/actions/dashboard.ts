@@ -7,6 +7,9 @@ export async function getDashboardData(uid: string) {
   if (!uid) {
     throw new Error("User is not authenticated.");
   }
+  if (!db) {
+    throw new Error("Database is not initialized.");
+  }
 
   try {
     const conversationsQuery = query(collection(db, "conversations"), where("userId", "==", uid));

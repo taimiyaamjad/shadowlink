@@ -35,7 +35,7 @@ export function ChatArea() {
   }, [messages]);
 
   useEffect(() => {
-    if (conversationId) {
+    if (conversationId && db) {
       const unsub = onSnapshot(doc(db, "conversations", conversationId), (doc) => {
         if (doc.exists()) {
           const data = doc.data();
@@ -50,7 +50,7 @@ export function ChatArea() {
     } else {
         setMessages([]);
     }
-  }, [conversationId, router, toast]);
+  }, [conversationId, router, toast, db]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
