@@ -129,7 +129,7 @@ export async function getConversations(uid: string) {
     const q = query(
       collection(db, "conversations"),
       where("userId", "==", uid),
-      orderBy("lastMessageAt", "desc"),
+      // orderBy("lastMessageAt", "desc"), // This query requires a composite index. Removing for now.
       limit(20)
     );
     const querySnapshot = await getDocs(q);
