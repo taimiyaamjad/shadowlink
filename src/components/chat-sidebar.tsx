@@ -2,7 +2,7 @@
 
 import { User as FirebaseUser } from "firebase/auth";
 import { useRouter, usePathname, useParams } from "next/navigation";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase"; // Import db
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -44,7 +44,7 @@ export function ChatSidebar({ user }: ChatSidebarProps) {
   const [loadingHistory, setLoadingHistory] = useState(true);
 
   useEffect(() => {
-    if (user) {
+    if (user && db) { // Check if db is initialized
         setLoadingHistory(true);
         getConversations(user.uid).then(result => {
             if(result.success && result.conversations) {
@@ -55,7 +55,7 @@ export function ChatSidebar({ user }: ChatSidebarProps) {
             setLoadingHistory(false);
         })
     }
-  }, [user, pathname]);
+  }, [user, pathname, db]); // Add db to dependency array
 
 
   const handleLogout = async () => {
