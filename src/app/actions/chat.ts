@@ -15,11 +15,11 @@ import {
   orderBy,
   getDoc,
   Timestamp,
+  setDoc,
 } from "firebase/firestore";
 import { getFirebaseInstances } from "@/lib/firebase";
 import { revalidatePath } from "next/cache";
 import type { Message, Conversation } from "@/lib/types";
-import { useRouter } from "next/navigation";
 
 // IMPORTANT: The following GenAI flow imports are available because they
 // have been pre-built by another process.
@@ -59,7 +59,6 @@ export async function sendMessage(
     let conversationHistory = "";
     
     // Fetch all past conversations to build a complete history for the AI.
-    // REMOVED `orderBy` to prevent index error. Sorting is handled in code below.
     const historyQuery = query(
       collection(db, "conversations"),
       where("userId", "==", uid)
