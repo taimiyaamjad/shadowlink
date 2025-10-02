@@ -93,17 +93,8 @@ export async function sendMessage(
 
     if (currentConversationId) {
       const conversationRef = doc(db, 'conversations', currentConversationId);
-      // For updates, we create new message objects for arrayUnion, but use serverTimestamp for the root-level field
-       const userMessageForUpdate: Omit<Message, 'id'> = {
-          ...userMessage,
-          createdAt: serverTimestamp() as any,
-       };
-        const aiMessageForUpdate: Omit<Message, 'id'> = {
-          ...aiMessage,
-          createdAt: serverTimestamp() as any,
-        };
       await updateDoc(conversationRef, {
-        messages: arrayUnion(userMessageForUpdate, aiMessageForUpdate),
+        messages: arrayUnion(userMessage, aiMessage),
         lastMessageAt: serverTimestamp()
       });
     } else {
@@ -159,3 +150,4 @@ export async function getConversations(uid: string) {
     return { success: false, error: errorMessage };
   }
 }
+
