@@ -13,7 +13,7 @@ import { Send, User, Bot } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ShadowLinkLogo } from "./icons";
 import { useParams, useRouter } from "next/navigation";
-import { doc, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot, Timestamp } from "firebase/firestore";
 
 export function ChatArea() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -60,7 +60,7 @@ export function ChatArea() {
       id: tempUserMessageId,
       text: input,
       sender: "user",
-      createdAt: new Date() as any, // Temporary client-side timestamp
+      createdAt: Timestamp.now(), // Use client-side Timestamp for optimistic update
     };
     
     // Optimistically update UI

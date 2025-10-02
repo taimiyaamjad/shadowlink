@@ -14,6 +14,7 @@ import {
   limit,
   orderBy,
   getDoc,
+  Timestamp,
 } from "firebase/firestore";
 import { getFirebaseInstances } from "@/lib/firebase";
 import { revalidatePath } from "next/cache";
@@ -77,22 +78,32 @@ export async function sendMessage(
     
     const aiResponseText = aiResponse.response;
 
+    const now = new Date();
     const userMessage: Omit<Message, 'id'> = {
         text: messageText,
         sender: 'user',
-        createdAt: serverTimestamp() as any
+        createdAt: Timestamp.fromDate(now)
     };
     
     const aiMessage: Omit<Message, 'id'> = {
         text: aiResponseText,
         sender: 'ai',
-        createdAt: serverTimestamp() as any
+        createdAt: Timestamp.fromDate(now)
     };
 
     if (currentConversationId) {
       const conversationRef = doc(db, 'conversations', currentConversationId);
+      // For updates, we create new message objects for arrayUnion, but use serverTimestamp for the root-level field
+       const userMessageForUpdate: Omit<Message, 'id'> = {
+          ...userMessage,
+          createdAt: serverTimestamp() as any,
+       };
+        const aiMessageForUpdate: Omit<Message, 'id'> = {
+          ...aiMessage,
+          createdAt: serverTimestamp() as any,
+        };
       await updateDoc(conversationRef, {
-        messages: arrayUnion(userMessage, aiMessage),
+        messages: arrayUnion(userMessageForUpdate, aiMessageForUpdate),
         lastMessageAt: serverTimestamp()
       });
     } else {
