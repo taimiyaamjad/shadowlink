@@ -1,3 +1,4 @@
+
 "use server";
 
 import {
@@ -44,6 +45,10 @@ export async function sendMessage(
   if (!messageText.trim()) {
     return { success: false, error: "Message cannot be empty." };
   }
+  if (!db) {
+    return { success: false, error: "Database is not initialized." };
+  }
+
 
   try {
     let currentConversationId = conversationId;
@@ -113,6 +118,9 @@ export async function sendMessage(
 export async function getConversations(uid: string) {
   if (!uid) {
     return { success: false, error: "User is not authenticated." };
+  }
+   if (!db) {
+    return { success: false, error: "Database is not initialized." };
   }
   try {
     const q = query(
