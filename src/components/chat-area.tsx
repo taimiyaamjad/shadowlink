@@ -38,13 +38,14 @@ export function ChatArea() {
       createdAt: new Date() as any, // Temporary client-side timestamp
     };
     
-    setMessages((prev) => [...prev, userMessage]);
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
     setInput("");
     setIsLoading(true);
     
     try {
       // In a real app, you would pass a conversation ID here
-      const result = await sendMessage(user.uid, "temp_conversation_id", input);
+      const result = await sendMessage(user.uid, "temp_conversation_id", input, newMessages);
 
       if (result.success && result.aiResponse) {
         const aiMessage: Message = {

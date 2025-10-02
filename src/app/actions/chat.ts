@@ -7,9 +7,15 @@ import {
   updateDoc,
   serverTimestamp,
   arrayUnion,
+  getDocs,
+  query,
+  where,
+  limit,
+  orderBy,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { revalidatePath } from "next/cache";
+import type { Message } from "@/lib/types";
 
 // IMPORTANT: The following GenAI flow imports are available because they
 // have been pre-built by another process.
@@ -17,6 +23,7 @@ import { revalidatePath } from "next/cache";
 import { generateInitialPersonality } from "@/ai/flows/generate-initial-personality";
 import { analyzeConversationPatterns } from "@/ai/flows/analyze-conversation-patterns";
 import { summarizeConversationHistory } from "@/ai/flows/summarize-conversation-history";
+import { generateChatResponse } from "@/ai/flows/generate-chat-response";
 
 /**
  * Note on Security:
@@ -27,8 +34,9 @@ import { summarizeConversationHistory } from "@/ai/flows/summarize-conversation-
  */
 export async function sendMessage(
   uid: string,
-  conversationId: string,
-  messageText: string
+  conversationId: string, // This will be used to fetch conversation history
+  messageText: string,
+  currentMessages: Message[]
 ) {
   if (!uid) {
     return { success: false, error: "User is not authenticated." };
@@ -38,6 +46,21 @@ export async function sendMessage(
   }
 
   try {
+    const conversationHistory = currentMessages
+      .map((msg) => `${msg.sender}: ${msg.text}`)
+      .join("\n");
+
+    const aiResponse = await generateChatResponse({
+      conversationHistory,
+      latestMessage: messageText,
+    });
+    
+    const aiResponseText = aiResponse.response;
+
+    // This is where you would persist the messages to Firestore
+    // For now, we are just returning the AI response to the client
+    // which manages the message list in its state.
+    
     // In a real app, conversation management would be more robust.
     // For now, we are just simulating the interaction.
     // const conversationRef = doc(db, 'conversations', conversationId);
@@ -50,10 +73,6 @@ export async function sendMessage(
     
     // await updateDoc(conversationRef, { messages: arrayUnion(userMessage) });
 
-    // This is where you would call the Gemini AI to get a response
-    // For this example, we'll just echo the message back with a prefix.
-    const aiResponseText = `As an AI mirroring you, I've processed your message: "${messageText}"`;
-
     const aiMessage = {
         text: aiResponseText,
         sender: 'ai',
@@ -62,7 +81,8 @@ export async function sendMessage(
 
     // await updateDoc(conversationRef, { messages: arrayUnion(aiMessage) });
 
-    revalidatePath(`/chat/${conversationId}`);
+    // Since we aren't using a real conversationId yet, we can't revalidate a specific path
+    // revalidatePath(`/chat/${conversationId}`);
 
     return { success: true, aiResponse: aiResponseText };
   } catch (error) {
