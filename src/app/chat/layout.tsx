@@ -8,9 +8,8 @@ import { Loader2 } from "lucide-react";
 import { app } from "@/lib/firebase"; // Import app
 
 export default function ChatLayout({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading, firebaseInitialized } = useAuth();
   const router = useRouter();
-  const pathname = usePathname();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -18,7 +17,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
     }
   }, [user, loading, router]);
 
-  if (loading || !user || !app) { // Check for app initialization
+  if (loading || !user || !firebaseInitialized) { 
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-accent" />
@@ -26,7 +25,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
     );
   }
   
-  // By confirming `app` is initialized before rendering, we ensure children
+  // By confirming `firebaseInitialized` is true before rendering, we ensure children
   // components like ChatSidebar will have a ready Firebase instance.
   return (
     <div className="flex h-screen bg-background">

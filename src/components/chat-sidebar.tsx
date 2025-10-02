@@ -2,7 +2,8 @@
 
 import { User as FirebaseUser } from "firebase/auth";
 import { useRouter, usePathname, useParams } from "next/navigation";
-import { auth, db } from "@/lib/firebase";
+import { auth } from "@/lib/firebase";
+import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -38,6 +39,7 @@ export function ChatSidebar({ user }: ChatSidebarProps) {
   const pathname = usePathname();
   const params = useParams();
   const { toast } = useToast();
+  const { db } = useAuth();
   const userAvatar = PlaceHolderImages.find(img => img.id === 'user-avatar-1');
 
   const [conversations, setConversations] = useState<ConversationTitle[]>([]);
@@ -51,11 +53,24 @@ export function ChatSidebar({ user }: ChatSidebarProps) {
                 setConversations(result.conversations);
             } else if (result.error) {
                 console.error("Error fetching conversations:", result.error);
+                toast({
+                    variant: "destructive",
+                    title: "Error fetching history",
+                    description: result.error,
+                });
             }
+            setLoadingHistory(false);
+        }).catch(error => {
+            console.error("Failed to get conversations:", error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Could not fetch conversation history.",
+            });
             setLoadingHistory(false);
         })
     }
-  }, [user, pathname, db]); // Add db to dependency array
+  }, [user, pathname, db, toast]); // Add db to dependency array
 
 
   const handleLogout = async () => {

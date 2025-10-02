@@ -14,13 +14,12 @@ import { useToast } from "@/hooks/use-toast";
 import { ShadowLinkLogo } from "./icons";
 import { useParams, useRouter } from "next/navigation";
 import { doc, onSnapshot } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 
 export function ChatArea() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuth();
+  const { user, db } = useAuth();
   const { toast } = useToast();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const params = useParams();

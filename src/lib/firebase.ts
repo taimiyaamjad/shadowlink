@@ -13,14 +13,14 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-let app: FirebaseApp;
-if (!getApps().length) {
-  app = initializeApp(firebaseConfig);
-} else {
-  app = getApp();
+function getFirebaseInstances() {
+    const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    return { app, auth, db };
 }
 
-const auth: Auth = getAuth(app);
-const db: Firestore = getFirestore(app);
-
-export { app, auth, db };
+// We are exporting the function to get instances,
+// and also pre-initialized instances for server-side compatibility where needed.
+const { app, auth, db } = getFirebaseInstances();
+export { app, auth, db, getFirebaseInstances };
