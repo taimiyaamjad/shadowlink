@@ -1,8 +1,8 @@
+
 "use client";
 
 import { User as FirebaseUser } from "firebase/auth";
 import { useRouter, usePathname, useParams } from "next/navigation";
-import { auth } from "@/lib/firebase";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -15,7 +15,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LogOut, MessageSquarePlus, ChevronDown, BookCopy, LayoutDashboard } from "lucide-react";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import Link from "next/link";
@@ -39,14 +38,17 @@ export function ChatSidebar({ user }: ChatSidebarProps) {
   const pathname = usePathname();
   const params = useParams();
   const { toast } = useToast();
-  const { db } = useAuth();
-  const userAvatar = PlaceHolderImages.find(img => img.id === 'user-avatar-1');
+  const { auth } = useAuth();
+  
+  // No longer need a separate placeholder for the avatar
+  // const userAvatar = PlaceHolderImages.find(img => img.id === 'user-avatar-1');
 
   const [conversations, setConversations] = useState<ConversationTitle[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
 
   useEffect(() => {
-    if (user && db) { // Check for db initialization
+    // Rely on the user object's existence to trigger fetch.
+    if (user) { 
         setLoadingHistory(true);
         getConversations(user.uid).then(result => {
             if(result.success && result.conversations) {
@@ -70,14 +72,16 @@ export function ChatSidebar({ user }: ChatSidebarProps) {
             setLoadingHistory(false);
         })
     }
-  }, [user, pathname, db, toast]); // Add db to dependency array
+  }, [user, pathname, toast]); // Removed `db` from dependency array
 
 
   const handleLogout = async () => {
     try {
-      await auth.signOut();
-      router.push("/login");
-      toast({ title: "Logged out successfully." });
+      if (auth) {
+        await auth.signOut();
+        router.push("/login");
+        toast({ title: "Logged out successfully." });
+      }
     } catch (error) {
       toast({
         variant: "destructive",
@@ -152,8 +156,6 @@ export function ChatSidebar({ user }: ChatSidebarProps) {
                 <Avatar className="h-9 w-9">
                   {user.photoURL ? (
                     <AvatarImage src={user.photoURL} alt={user.displayName || 'User'} />
-                  ) : userAvatar ? (
-                    <Image src={userAvatar.imageUrl} alt={userAvatar.description} width={36} height={36} />
                   ) : null }
                   <AvatarFallback className="bg-primary text-primary-foreground">
                     {getInitials(user.displayName)}

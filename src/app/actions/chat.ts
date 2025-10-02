@@ -15,7 +15,7 @@ import {
   orderBy,
   getDoc,
 } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { getFirebaseInstances } from "@/lib/firebase";
 import { revalidatePath } from "next/cache";
 import type { Message, Conversation } from "@/lib/types";
 
@@ -45,6 +45,8 @@ export async function sendMessage(
   if (!messageText.trim()) {
     return { success: false, error: "Message cannot be empty." };
   }
+  
+  const { db } = getFirebaseInstances();
   if (!db) {
     return { success: false, error: "Database is not initialized." };
   }
@@ -119,6 +121,7 @@ export async function getConversations(uid: string) {
   if (!uid) {
     return { success: false, error: "User is not authenticated." };
   }
+  const { db } = getFirebaseInstances();
    if (!db) {
     return { success: false, error: "Database is not initialized." };
   }
@@ -141,7 +144,7 @@ export async function getConversations(uid: string) {
     return { success: true, conversations };
   } catch (error) {
     console.error("Error fetching conversations:", error);
-    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+    const errorMessage = error instanceof Error ? `Error fetching conversations: "${error.message}"` : "An unknown error occurred while fetching conversations.";
     return { success: false, error: errorMessage };
   }
 }

@@ -1,12 +1,14 @@
+
 "use server";
 
 import { collection, getDocs, query, where, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { getFirebaseInstances } from "@/lib/firebase";
 
 export async function getDashboardData(uid: string) {
   if (!uid) {
     throw new Error("User is not authenticated.");
   }
+  const { db } = getFirebaseInstances();
   if (!db) {
     throw new Error("Database is not initialized.");
   }
