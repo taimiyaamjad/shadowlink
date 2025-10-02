@@ -2,7 +2,7 @@
 
 import { User as FirebaseUser } from "firebase/auth";
 import { useRouter, usePathname, useParams } from "next/navigation";
-import { auth, db, app } from "@/lib/firebase"; // Import app and db
+import { auth, db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -44,18 +44,18 @@ export function ChatSidebar({ user }: ChatSidebarProps) {
   const [loadingHistory, setLoadingHistory] = useState(true);
 
   useEffect(() => {
-    if (user && app) { // Check if app is initialized
+    if (user) {
         setLoadingHistory(true);
         getConversations(user.uid).then(result => {
             if(result.success && result.conversations) {
                 setConversations(result.conversations);
-            } else {
-                console.error(result.error);
+            } else if (result.error) {
+                console.error("Error fetching conversations:", result.error);
             }
             setLoadingHistory(false);
         })
     }
-  }, [user, pathname, app]); // Add app to dependency array
+  }, [user, pathname]);
 
 
   const handleLogout = async () => {

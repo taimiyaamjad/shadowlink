@@ -26,6 +26,8 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
     );
   }
   
+  // By confirming `app` is initialized before rendering, we ensure children
+  // components like ChatSidebar will have a ready Firebase instance.
   return (
     <div className="flex h-screen bg-background">
       <ChatSidebar user={user} />
