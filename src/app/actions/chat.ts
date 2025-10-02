@@ -57,15 +57,32 @@ export async function sendMessage(
     let currentConversationId = conversationId;
     let conversationHistory = "";
     
+    // Fetch all past conversations to build a complete history for the AI.
+    const historyQuery = query(
+      collection(db, "conversations"),
+      where("userId", "==", uid),
+      orderBy("lastMessageAt", "desc")
+    );
+    const historySnapshot = await getDocs(historyQuery);
+    const allMessages: Message[] = [];
+    historySnapshot.forEach(doc => {
+      const data = doc.data() as Conversation;
+      if (data.messages) {
+        allMessages.push(...data.messages);
+      }
+    });
+
+    // Sort all messages by creation time to ensure correct chronological order
+    allMessages.sort((a, b) => (a.createdAt as Timestamp).toMillis() - (b.createdAt as Timestamp).toMillis());
+    conversationHistory = allMessages
+      .map((msg) => `${msg.sender}: ${msg.text}`)
+      .join("\n");
+
+
     // If we have a conversationId, fetch it. Otherwise, we'll create a new one.
     if (currentConversationId) {
       const convDoc = await getDoc(doc(db, "conversations", currentConversationId));
-      if (convDoc.exists()) {
-        const conversation = convDoc.data() as Conversation;
-        conversationHistory = conversation.messages
-          .map((msg) => `${msg.sender}: ${msg.text}`)
-          .join("\n");
-      } else {
+      if (!convDoc.exists()) {
         // Conversation doesn't exist, so we create a new one
         currentConversationId = null; 
       }
@@ -74,6 +91,7 @@ export async function sendMessage(
     const aiResponse = await generateChatResponse({
       conversationHistory: conversationHistory,
       latestMessage: messageText,
+      gender: "female", // Example: Hardcoded for now, can be a user setting later
     });
     
     const aiResponseText = aiResponse.response;
@@ -98,13 +116,17 @@ export async function sendMessage(
         lastMessageAt: serverTimestamp()
       });
     } else {
-      const newConversationRef = await addDoc(collection(db, 'conversations'), {
+      // Create a new conversation and immediately get its ID for faster redirection
+      const newConversationRef = doc(collection(db, 'conversations'));
+      currentConversationId = newConversationRef.id;
+
+      await addDoc(collection(db, 'conversations'), {
+        id: currentConversationId,
         userId: uid,
         createdAt: serverTimestamp(),
         lastMessageAt: serverTimestamp(),
         messages: [userMessage, aiMessage]
       });
-      currentConversationId = newConversationRef.id;
     }
 
     revalidatePath(`/chat/${currentConversationId}`);
@@ -131,7 +153,7 @@ export async function getConversations(uid: string) {
     const q = query(
       collection(db, "conversations"),
       where("userId", "==", uid),
-      // orderBy("lastMessageAt", "desc"), // This query requires a composite index. Removing for now.
+      orderBy("lastMessageAt", "desc"),
       limit(20)
     );
     const querySnapshot = await getDocs(q);
@@ -150,4 +172,3 @@ export async function getConversations(uid: string) {
     return { success: false, error: errorMessage };
   }
 }
-
