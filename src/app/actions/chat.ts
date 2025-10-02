@@ -19,6 +19,7 @@ import {
 import { getFirebaseInstances } from "@/lib/firebase";
 import { revalidatePath } from "next/cache";
 import type { Message, Conversation } from "@/lib/types";
+import { useRouter } from "next/navigation";
 
 // IMPORTANT: The following GenAI flow imports are available because they
 // have been pre-built by another process.
@@ -58,10 +59,10 @@ export async function sendMessage(
     let conversationHistory = "";
     
     // Fetch all past conversations to build a complete history for the AI.
+    // REMOVED `orderBy` to prevent index error. Sorting is handled in code below.
     const historyQuery = query(
       collection(db, "conversations"),
-      where("userId", "==", uid),
-      orderBy("lastMessageAt", "desc")
+      where("userId", "==", uid)
     );
     const historySnapshot = await getDocs(historyQuery);
     const allMessages: Message[] = [];
@@ -128,17 +129,7 @@ export async function sendMessage(
 
       await setDoc(newConversationRef, newConversationData);
     }
-
-    // Instead of revalidating, we will let the client-side subscription handle updates.
-    // This makes the UI feel faster.
-    // revalidatePath(`/chat/${currentConversationId}`);
-    // revalidatePath(`/chat/dashboard`);
-
-    if (!conversationId) {
-      router.push(`/chat/${currentConversationId}`);
-    }
-
-
+    
     return { success: true, aiResponse: aiResponseText, conversationId: currentConversationId };
   } catch (error) {
     console.error("Error sending message:", error);
