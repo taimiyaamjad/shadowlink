@@ -221,13 +221,13 @@ export default function Home() {
                                         <Mail className="h-6 w-6 text-primary" />
                                         <div className="flex-1">
                                             <p className="font-semibold">Email</p>
-                                            <a href="mailto:contact@shadowlink.ai" className="text-muted-foreground hover:text-foreground">
-                                                contact@shadowlink.ai
+                                            <a href="mailto:taimiyaamjad0@gmail.com" className="text-muted-foreground hover:text-foreground">
+                                                taimiyaamjad0@gmail.com
                                             </a>
                                         </div>
                                     </div>
                                     <Button asChild className="w-full" variant="outline">
-                                        <a href="mailto:contact@shadowlink.ai">
+                                        <a href="mailto:taimiyaamjad0@gmail.com">
                                             Send us an email <ChevronRight className="ml-2 h-4 w-4"/>
                                         </a>
                                     </Button>
