@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { ChatSidebar } from "@/components/chat-sidebar";
 import { Loader2 } from "lucide-react";
+import { app } from "@/lib/firebase"; // Import app
 
 export default function ChatLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -14,12 +15,10 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     if (!loading && !user) {
       router.replace("/login");
-    } else if (!loading && user && pathname === '/chat') {
-      router.replace('/chat/dashboard');
     }
   }, [user, loading, router, pathname]);
 
-  if (loading || !user) {
+  if (loading || !user || !app) { // Check for app initialization
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-accent" />
