@@ -116,17 +116,17 @@ export async function sendMessage(
         lastMessageAt: serverTimestamp()
       });
     } else {
-      // Create a new conversation and immediately get its ID for faster redirection
       const newConversationRef = doc(collection(db, 'conversations'));
       currentConversationId = newConversationRef.id;
 
-      await addDoc(collection(db, 'conversations'), {
-        id: currentConversationId,
+      const newConversationData: Omit<Conversation, 'id'> = {
         userId: uid,
-        createdAt: serverTimestamp(),
-        lastMessageAt: serverTimestamp(),
-        messages: [userMessage, aiMessage]
-      });
+        createdAt: serverTimestamp() as Timestamp,
+        lastMessageAt: serverTimestamp() as Timestamp,
+        messages: [userMessage, aiMessage] as Message[],
+      };
+
+      await setDoc(newConversationRef, newConversationData);
     }
 
     revalidatePath(`/chat/${currentConversationId}`);
@@ -152,20 +152,34 @@ export async function getConversations(uid: string) {
   try {
     const q = query(
       collection(db, "conversations"),
-      where("userId", "==", uid),
-      orderBy("lastMessageAt", "desc"),
-      limit(20)
+      where("userId", "==", uid)
     );
     const querySnapshot = await getDocs(q);
     const conversations = querySnapshot.docs.map(doc => {
-        const data = doc.data();
-        const lastMessage = data.messages[data.messages.length - 1];
+        const data = doc.data() as Conversation;
         return {
             id: doc.id,
-            title: lastMessage?.text.substring(0, 30) + '...' || 'New Conversation',
+            ...data,
         }
     });
-    return { success: true, conversations };
+
+    // Sort conversations by lastMessageAt descending
+    conversations.sort((a, b) => {
+        const timeA = a.lastMessageAt?.toMillis() || 0;
+        const timeB = b.lastMessageAt?.toMillis() || 0;
+        return timeB - timeA;
+    });
+
+    const formattedConversations = conversations.slice(0, 20).map(conv => {
+        const lastMessage = conv.messages[conv.messages.length - 1];
+        return {
+             id: conv.id,
+             title: lastMessage?.text.substring(0, 30) + '...' || 'New Conversation',
+        }
+    });
+
+
+    return { success: true, conversations: formattedConversations };
   } catch (error) {
     console.error("Error fetching conversations:", error);
     const errorMessage = error instanceof Error ? `Error fetching conversations: "${error.message}"` : "An unknown error occurred while fetching conversations.";
