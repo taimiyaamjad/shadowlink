@@ -17,22 +17,31 @@ export default function Home() {
           </div>
           <div className="container px-4 md:px-6 z-10">
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:gap-16">
-              <div className="flex flex-col justify-center space-y-4">
-                <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl font-headline bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+              <div className="flex flex-col justify-center space-y-4 animate-in slide-in-from-bottom">
+                <h1
+                  className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl font-headline bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400"
+                  style={{ animationDelay: '0.1s' }}
+                >
                   Your Digital Doppelgänger Awaits
                 </h1>
-                <p className="max-w-[600px] text-muted-foreground md:text-xl">
+                <p 
+                  className="max-w-[600px] text-muted-foreground md:text-xl"
+                  style={{ animationDelay: '0.2s' }}
+                >
                   ShadowLink uses Gemini AI to learn your personality, creating a digital twin that can chat, write, and think just like you. Train your AI, and unleash your digital self.
                 </p>
-                <div className="w-full max-w-sm">
+                <div 
+                  className="w-full max-w-sm"
+                  style={{ animationDelay: '0.3s' }}
+                >
                   <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
                     <Link href="/signup">Get Started For Free</Link>
                   </Button>
                 </div>
               </div>
               <div className="hidden lg:flex items-center justify-center">
-                <Card className="glass-card w-full max-w-md p-6 rounded-2xl shadow-2xl">
-                    <div className="flex items-start gap-4">
+                <Card className="glass-card w-full max-w-md p-6 rounded-2xl shadow-2xl animate-in" style={{ animationDelay: '0.4s' }}>
+                    <div className="flex items-start gap-4 animate-in slide-in-from-bottom" style={{ animationDelay: '0.5s' }}>
                         <div className="bg-primary rounded-full p-2">
                             <MessageCircle className="h-6 w-6 text-primary-foreground" />
                         </div>
@@ -40,7 +49,7 @@ export default function Home() {
                             <p className="text-sm text-foreground">Hey, how's it going? I was thinking about our project...</p>
                         </div>
                     </div>
-                     <div className="flex items-start gap-4 mt-4 justify-end">
+                     <div className="flex items-start gap-4 mt-4 justify-end animate-in slide-in-from-bottom" style={{ animationDelay: '0.8s' }}>
                         <div className="bg-accent p-3 rounded-lg flex-1 text-right">
                             <p className="text-sm text-accent-foreground">It's going great! I just pushed the latest updates. I was thinking we could add that new feature we discussed. What do you think?</p>
                         </div>
@@ -48,7 +57,7 @@ export default function Home() {
                             <BrainCircuit className="h-6 w-6 text-secondary-foreground" />
                         </div>
                     </div>
-                     <div className="flex items-start gap-4 mt-4">
+                     <div className="flex items-start gap-4 mt-4 animate-in slide-in-from-bottom" style={{ animationDelay: '1.1s' }}>
                         <div className="bg-primary rounded-full p-2">
                             <MessageCircle className="h-6 w-6 text-primary-foreground" />
                         </div>
@@ -66,15 +75,15 @@ export default function Home() {
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">Key Features</div>
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl font-headline">Forge Your Digital Identity</h2>
-                <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm animate-in" style={{ animationDelay: '0.2s' }}>Key Features</div>
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl font-headline animate-in" style={{ animationDelay: '0.3s' }}>Forge Your Digital Identity</h2>
+                <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed animate-in" style={{ animationDelay: '0.4s' }}>
                   ShadowLink provides a powerful suite of tools to create and refine an AI that is truly yours.
                 </p>
               </div>
             </div>
             <div className="mx-auto grid max-w-5xl items-start gap-8 py-12 sm:grid-cols-2 md:gap-12 lg:grid-cols-3">
-              <div className="grid gap-1 text-center">
+              <div className="grid gap-1 text-center animate-in slide-in-from-bottom" style={{ animationDelay: '0.5s' }}>
                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
                   <BrainCircuit className="h-8 w-8" />
                 </div>
@@ -83,7 +92,7 @@ export default function Home() {
                   Our Gemini-powered engine analyzes your conversations to mimic your unique writing style, tone, and response patterns.
                 </p>
               </div>
-              <div className="grid gap-1 text-center">
+              <div className="grid gap-1 text-center animate-in slide-in-from-bottom" style={{ animationDelay: '0.6s' }}>
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
                   <MessageCircle className="h-8 w-8" />
                 </div>
@@ -92,7 +101,7 @@ export default function Home() {
                   Engage in dynamic conversations with your AI. The more you chat, the more it learns and adapts.
                 </p>
               </div>
-              <div className="grid gap-1 text-center">
+              <div className="grid gap-1 text-center animate-in slide-in-from-bottom" style={{ animationDelay: '0.7s' }}>
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
                   <BookCopy className="h-8 w-8" />
                 </div>

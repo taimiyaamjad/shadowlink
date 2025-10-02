@@ -62,8 +62,37 @@ body {
     background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAABVQTFRF////AAAAAAAAAAAAAAAAAAAAAAAA////AAAAwbP/YgAAAAd0Uk5T//8A/wD/gP93/wGSAAAAAWJLR0QHFmKyCQAAAEhJREFUeNqdz7ENACAMAlAz8uA/58P8qg6shwD82n6sJ7fRz5ZkR1pG9kR2tK9c1pG9kR2tK9c1pG9kR2tK9c1pG9kR2tK9c1pG98P/wCSQkF3YwA7cSAAAAAElFTkSuQmCC');
     background-repeat: repeat;
   }
+
+  .animate-in {
+    animation-name: fade-in;
+    animation-duration: 0.5s;
+    animation-timing-function: ease-out;
+    animation-fill-mode: both;
+  }
+
+  .animate-in.slide-in-from-bottom {
+      animation-name: fade-in, slide-from-bottom;
+  }
 }
 
 .glass-card {
   @apply bg-card/50 backdrop-blur-xl border border-white/10;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-from-bottom {
+    from {
+        transform: translateY(10px);
+    }
+    to {
+        transform: translateY(0);
+    }
 }
