@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -9,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, User, Bot } from "lucide-react";
+import { Send, User, Bot, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { ShadowLinkLogo } from "./icons";
 import { useParams, useRouter } from "next/navigation";
@@ -18,7 +19,8 @@ import { doc, onSnapshot, Timestamp } from "firebase/firestore";
 export function ChatArea() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [isAiThinking, setIsAiThinking] = useState(false);
   const { user, db } = useAuth();
   const { toast } = useToast();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -31,16 +33,24 @@ export function ChatArea() {
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, isAiThinking]);
 
   useEffect(() => {
     if (conversationId && db) {
+      setIsAiThinking(true);
       const unsub = onSnapshot(doc(db, "conversations", conversationId), (doc) => {
         if (doc.exists()) {
           const data = doc.data();
-          setMessages(data.messages || []);
+          const currentMessages = data.messages || [];
+          setMessages(currentMessages);
+
+          // Check if the last message is from the user
+          if (currentMessages.length > 0 && currentMessages[currentMessages.length - 1].sender === 'user') {
+            setIsAiThinking(true);
+          } else {
+            setIsAiThinking(false);
+          }
         } else {
-          // If conversation doesn't exist, maybe redirect or show an error
           toast({ variant: 'destructive', title: 'Error', description: 'Conversation not found.' });
           router.push('/chat/dashboard');
         }
@@ -48,37 +58,40 @@ export function ChatArea() {
       return () => unsub();
     } else {
         setMessages([]);
+        setIsAiThinking(false);
     }
   }, [conversationId, router, toast, db]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || !user) return;
+    if (!input.trim() || !user || isSending) return;
 
     const tempUserMessageId = Date.now().toString();
     const userMessage: Message = {
       id: tempUserMessageId,
       text: input,
       sender: "user",
-      createdAt: Timestamp.now(), // Use client-side Timestamp for optimistic update
+      createdAt: Timestamp.now(),
     };
     
-    // Optimistically update UI
-    setMessages((prev) => [...prev, userMessage]);
+    setIsSending(true);
+    if (isNewChat) {
+      setMessages((prev) => [...prev, userMessage]);
+      setIsAiThinking(true);
+    }
+    
     const currentInput = input;
     setInput("");
-    setIsLoading(true);
     
     try {
       const result = await sendMessage(user.uid, conversationId || null, currentInput);
 
       if (result.success && result.conversationId) {
-        // If it's a new conversation, redirect to the new URL
         if (!conversationId) {
           router.push(`/chat/${result.conversationId}`);
         }
       } else {
-        throw new Error(result.error || "Failed to get AI response.");
+        throw new Error(result.error || "Failed to send message.");
       }
     } catch (error) {
       toast({
@@ -86,10 +99,13 @@ export function ChatArea() {
         title: "Error",
         description: (error as Error).message,
       });
-      // Revert optimistic update
-      setMessages(prev => prev.filter(m => m.id !== tempUserMessageId));
+      // Revert optimistic update only if it was a new chat
+      if(isNewChat) {
+        setMessages(prev => prev.filter(m => m.id !== tempUserMessageId));
+        setIsAiThinking(false);
+      }
     } finally {
-        setIsLoading(false);
+        setIsSending(false);
     }
   };
   
@@ -139,7 +155,7 @@ export function ChatArea() {
                 )}
               </div>
             ))}
-            {isLoading && (
+            {isAiThinking && (
                  <div className="flex items-start gap-4">
                      <Avatar className="h-8 w-8 border-2 border-primary">
                         <AvatarFallback className="bg-transparent"><Bot className="h-5 w-5 text-primary" /></AvatarFallback>
@@ -172,10 +188,10 @@ export function ChatArea() {
                   handleSendMessage(e);
                 }
               }}
-              disabled={isLoading}
+              disabled={isSending}
             />
-            <Button type="submit" size="icon" disabled={!input.trim() || isLoading}>
-              <Send className="h-4 w-4" />
+            <Button type="submit" size="icon" disabled={!input.trim() || isSending}>
+              {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             </Button>
           </form>
         </Card>
