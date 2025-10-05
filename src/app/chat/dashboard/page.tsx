@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
 import { getDashboardData } from '@/app/actions/dashboard';
-import { BarChart, LineChart, PieChart, MessageSquarePlus, Bot } from 'lucide-react';
+import { BarChart, LineChart, PieChart, MessageSquarePlus, Bot, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -72,7 +72,7 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-medium">
               AI Messages
             </CardTitle>
-            <LineChart className="h-4 w-4 text-muted-foreground" />
+            <Bot className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             {loading ? <Skeleton className="h-8 w-24" /> : <div className="text-2xl font-bold">{dashboardData?.aiMessages || 0}</div>}
@@ -82,7 +82,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">User Messages</CardTitle>
-            <PieChart className="h-4 w-4 text-muted-foreground" />
+            <LineChart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             {loading ? <Skeleton className="h-8 w-24" /> : <div className="text-2xl font-bold">{dashboardData?.userMessages || 0}</div>}
@@ -92,7 +92,7 @@ export default function DashboardPage() {
          <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Conversations</CardTitle>
-            <BarChart className="h-4 w-4 text-muted-foreground" />
+            <PieChart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
              {loading ? <Skeleton className="h-8 w-24" /> : <div className="text-2xl font-bold">{dashboardData?.totalConversations || 0}</div>}
@@ -101,46 +101,80 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-       <Card className="lg:col-span-7">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-                <Bot className="h-6 w-6 text-accent"/>
-                Digital Trajectory
-            </CardTitle>
-            <CardDescription>
-                An AI-driven simulation of your life trajectory based on your conversational patterns.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-                <div className="space-y-4">
-                    <Skeleton className="h-6 w-1/4" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-6 w-1/4" />
-                    <Skeleton className="h-4 w-full" />
-                </div>
-            ) : dashboardData?.trajectoryAnalysis ? (
-                <div className="space-y-4 text-sm">
-                    <div>
-                        <h4 className="font-semibold mb-1">Writing Style</h4>
-                        <p className="text-muted-foreground">{dashboardData.trajectoryAnalysis.writingStyle}</p>
+       <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                    <Bot className="h-6 w-6 text-accent"/>
+                    Digital Trajectory
+                </CardTitle>
+                <CardDescription>
+                    Your conversational personality analysis.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                    <div className="space-y-4">
+                        <Skeleton className="h-6 w-1/4" />
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-6 w-1/4" />
+                        <Skeleton className="h-4 w-full" />
                     </div>
-                    <div>
-                        <h4 className="font-semibold mb-1">Tone</h4>
-                        <p className="text-muted-foreground">{dashboardData.trajectoryAnalysis.tone}</p>
+                ) : dashboardData?.trajectoryAnalysis ? (
+                    <div className="space-y-4 text-sm">
+                        <div>
+                            <h4 className="font-semibold mb-1">Writing Style</h4>
+                            <p className="text-muted-foreground">{dashboardData.trajectoryAnalysis.writingStyle}</p>
+                        </div>
+                        <div>
+                            <h4 className="font-semibold mb-1">Tone</h4>
+                            <p className="text-muted-foreground">{dashboardData.trajectoryAnalysis.tone}</p>
+                        </div>
+                        <div>
+                            <h4 className="font-semibold mb-1">Response Patterns</h4>
+                            <p className="text-muted-foreground">{dashboardData.trajectoryAnalysis.responsePatterns}</p>
+                        </div>
                     </div>
-                    <div>
-                        <h4 className="font-semibold mb-1">Response Patterns</h4>
-                        <p className="text-muted-foreground">{dashboardData.trajectoryAnalysis.responsePatterns}</p>
+                ) : (
+                    <p className="text-sm text-muted-foreground text-center py-8">
+                        Start chatting to analyze your digital trajectory. More than 5 messages are needed.
+                    </p>
+                )}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                    <Sparkles className="h-6 w-6 text-accent"/>
+                    ChronoMe: Future Projection
+                </CardTitle>
+                <CardDescription>
+                    A glimpse into a possible future based on your chats.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                    <div className="space-y-4">
+                        <Skeleton className="h-6 w-1/3" />
+                        <Skeleton className="h-4 w-full" />
+                         <Skeleton className="h-4 w-2/3" />
                     </div>
-                </div>
-            ) : (
-                <p className="text-sm text-muted-foreground text-center py-8">
-                    Start chatting to analyze your digital trajectory. More than 5 messages are needed.
-                </p>
-            )}
-          </CardContent>
-        </Card>
+                ) : dashboardData?.futureProjection ? (
+                    <div className="space-y-2 text-sm text-center flex flex-col items-center justify-center h-full">
+                       <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">{dashboardData.futureProjection.topic}</p>
+                       <p className="text-lg font-medium text-foreground">
+                            "{dashboardData.futureProjection.projection}"
+                        </p>
+                        <p className="text-sm text-muted-foreground pt-2">- ChronoMe, 2040</p>
+                    </div>
+                ) : (
+                    <p className="text-sm text-muted-foreground text-center py-8">
+                        Not enough data to project your future. Keep chatting!
+                    </p>
+                )}
+              </CardContent>
+            </Card>
+       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="lg:col-span-4">

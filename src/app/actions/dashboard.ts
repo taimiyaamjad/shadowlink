@@ -4,6 +4,7 @@
 import { collection, getDocs, query, where, Timestamp } from "firebase/firestore";
 import { getFirebaseInstances } from "@/lib/firebase";
 import { analyzeConversationPatterns } from "@/ai/flows/analyze-conversation-patterns";
+import { projectFutureSelf } from "@/ai/flows/project-future-self";
 import { Conversation } from "@/lib/types";
 
 export async function getDashboardData(uid: string) {
@@ -73,6 +74,8 @@ export async function getDashboardData(uid: string) {
     ];
 
     let trajectoryAnalysis = null;
+    let futureProjection = null;
+
     if (allMessages.length > 5) { // Only analyze if there's enough data
       const conversationHistory = allMessages
         .sort((a, b) => a.createdAt.toMillis() - b.createdAt.toMillis())
@@ -80,14 +83,26 @@ export async function getDashboardData(uid: string) {
         .join('\n');
       
       try {
-        trajectoryAnalysis = await analyzeConversationPatterns({ conversationHistory });
+        // Run analyses in parallel
+        const [trajectoryResult, projectionResult] = await Promise.all([
+           analyzeConversationPatterns({ conversationHistory }),
+           projectFutureSelf({ conversationHistory }),
+        ]);
+
+        trajectoryAnalysis = trajectoryResult;
+        futureProjection = projectionResult;
+
       } catch (aiError) {
-        console.error("Error analyzing conversation patterns:", aiError);
+        console.error("Error running AI analysis:", aiError);
         // Don't block dashboard load if AI fails
         trajectoryAnalysis = {
             writingStyle: "Could not be determined.",
             tone: "Could not be determined.",
             responsePatterns: "Could not be determined."
+        }
+        futureProjection = {
+            topic: "Unknown",
+            projection: "Could not project future at this time."
         }
       }
     }
@@ -100,7 +115,8 @@ export async function getDashboardData(uid: string) {
       aiMessages,
       messageVolume,
       messageDistribution,
-      trajectoryAnalysis
+      trajectoryAnalysis,
+      futureProjection,
     };
   } catch (error) {
     console.error("Error fetching dashboard data:", error);
