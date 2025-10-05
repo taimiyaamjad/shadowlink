@@ -10,8 +10,6 @@ import { Button } from '@/components/ui/button';
 import {
   Bar,
   BarChart as RechartsBarChart,
-  Line,
-  LineChart as RechartsLineChart,
   Pie,
   PieChart as RechartsPieChart,
   XAxis,
@@ -23,22 +21,6 @@ import {
 } from 'recharts';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const chartData = [
-  { month: 'January', desktop: 186, mobile: 80 },
-  { month: 'February', desktop: 305, mobile: 200 },
-  { month: 'March', desktop: 237, mobile: 120 },
-  { month: 'April', desktop: 73, mobile: 190 },
-  { month: 'May', desktop: 209, mobile: 130 },
-  { month: 'June', desktop: 214, mobile: 140 },
-];
-
-const pieData = [
-    { name: 'Direct', value: 400, fill: 'hsl(var(--primary))' },
-    { name: 'Referral', value: 300, fill: 'hsl(var(--accent))' },
-    { name: 'Social', value: 200, fill: 'hsl(var(--secondary))' },
-    { name: 'Organic', value: 278, fill: 'hsl(var(--muted-foreground))' },
-];
-
 export default function DashboardPage() {
     const { user } = useAuth();
     const [dashboardData, setDashboardData] = useState<any>(null);
@@ -46,12 +28,20 @@ export default function DashboardPage() {
 
     useEffect(() => {
         if (user) {
+            setLoading(true);
             getDashboardData(user.uid)
                 .then(data => {
-                    setDashboardData(data);
+                    if (data.error) {
+                        console.error(data.error);
+                    } else {
+                        setDashboardData(data);
+                    }
                     setLoading(false);
                 })
-                .catch(console.error);
+                .catch(err => {
+                    console.error(err);
+                    setLoading(false);
+                });
         }
     }, [user]);
 
