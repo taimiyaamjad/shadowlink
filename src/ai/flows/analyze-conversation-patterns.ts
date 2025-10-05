@@ -22,11 +22,11 @@ export type AnalyzeConversationPatternsInput = z.infer<
 >;
 
 const AnalyzeConversationPatternsOutputSchema = z.object({
-  writingStyle: z.string().describe('Analysis of the user\'s writing style.'),
-  tone: z.string().describe('Analysis of the user\'s tone in conversations.'),
+  writingStyle: z.string().describe("Analysis of the user's writing style."),
+  tone: z.string().describe("Analysis of the user's tone in conversations."),
   responsePatterns: z
     .string()
-    .describe('Identified response patterns in the user\'s conversations.'),
+    .describe("Identified response patterns in the user's conversations."),
 });
 export type AnalyzeConversationPatternsOutput = z.infer<
   typeof AnalyzeConversationPatternsOutputSchema
@@ -46,13 +46,7 @@ const analyzeConversationPatternsPrompt = ai.definePrompt({
 
 Conversation History:
 {{{conversationHistory}}}
-
-Output should be structured as a JSON object matching the following schema:
-${JSON.stringify(
-    AnalyzeConversationPatternsOutputSchema.describe(
-      'JSON schema for conversation pattern analysis output'
-    )
-  )}`,
+`,
 });
 
 const analyzeConversationPatternsFlow = ai.defineFlow(

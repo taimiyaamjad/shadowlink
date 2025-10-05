@@ -3,6 +3,8 @@
 
 import { collection, getDocs, query, where, Timestamp } from "firebase/firestore";
 import { getFirebaseInstances } from "@/lib/firebase";
+import { analyzeConversationPatterns } from "@/ai/flows/analyze-conversation-patterns";
+import { Conversation } from "@/lib/types";
 
 export async function getDashboardData(uid: string) {
   if (!uid) {
@@ -34,16 +36,20 @@ export async function getDashboardData(uid: string) {
         ai: 0,
     })).reverse();
 
+    const allMessages: { sender: 'user' | 'ai', text: string, createdAt: Timestamp }[] = [];
+
     conversationsSnapshot.forEach(doc => {
-      const data = doc.data();
+      const data = doc.data() as Conversation;
       if (data.messages && Array.isArray(data.messages)) {
         totalMessages += data.messages.length;
-        data.messages.forEach((message: { sender: 'user' | 'ai', createdAt: Timestamp }) => {
+        data.messages.forEach((message) => {
           if (message.sender === 'user') {
             userMessages++;
           } else {
             aiMessages++;
           }
+
+          allMessages.push(message);
 
           if (message.createdAt) {
             const messageDate = message.createdAt.toDate();
@@ -66,13 +72,35 @@ export async function getDashboardData(uid: string) {
         { name: 'AI', value: aiMessages, fill: 'hsl(var(--accent))' }
     ];
 
+    let trajectoryAnalysis = null;
+    if (allMessages.length > 5) { // Only analyze if there's enough data
+      const conversationHistory = allMessages
+        .sort((a, b) => a.createdAt.toMillis() - b.createdAt.toMillis())
+        .map(msg => `${msg.sender}: ${msg.text}`)
+        .join('\n');
+      
+      try {
+        trajectoryAnalysis = await analyzeConversationPatterns({ conversationHistory });
+      } catch (aiError) {
+        console.error("Error analyzing conversation patterns:", aiError);
+        // Don't block dashboard load if AI fails
+        trajectoryAnalysis = {
+            writingStyle: "Could not be determined.",
+            tone: "Could not be determined.",
+            responsePatterns: "Could not be determined."
+        }
+      }
+    }
+
+
     return {
       totalConversations: conversationsSnapshot.size,
       totalMessages,
       userMessages,
       aiMessages,
       messageVolume,
-      messageDistribution
+      messageDistribution,
+      trajectoryAnalysis
     };
   } catch (error) {
     console.error("Error fetching dashboard data:", error);

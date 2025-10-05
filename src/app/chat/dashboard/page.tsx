@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
 import { getDashboardData } from '@/app/actions/dashboard';
-import { BarChart, LineChart, PieChart, MessageSquarePlus } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { BarChart, LineChart, PieChart, MessageSquarePlus, Bot } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
   Bar,
@@ -100,6 +100,48 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+       <Card className="lg:col-span-7">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+                <Bot className="h-6 w-6 text-accent"/>
+                Digital Trajectory
+            </CardTitle>
+            <CardDescription>
+                An AI-driven simulation of your life trajectory based on your conversational patterns.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+                <div className="space-y-4">
+                    <Skeleton className="h-6 w-1/4" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-6 w-1/4" />
+                    <Skeleton className="h-4 w-full" />
+                </div>
+            ) : dashboardData?.trajectoryAnalysis ? (
+                <div className="space-y-4 text-sm">
+                    <div>
+                        <h4 className="font-semibold mb-1">Writing Style</h4>
+                        <p className="text-muted-foreground">{dashboardData.trajectoryAnalysis.writingStyle}</p>
+                    </div>
+                    <div>
+                        <h4 className="font-semibold mb-1">Tone</h4>
+                        <p className="text-muted-foreground">{dashboardData.trajectoryAnalysis.tone}</p>
+                    </div>
+                    <div>
+                        <h4 className="font-semibold mb-1">Response Patterns</h4>
+                        <p className="text-muted-foreground">{dashboardData.trajectoryAnalysis.responsePatterns}</p>
+                    </div>
+                </div>
+            ) : (
+                <p className="text-sm text-muted-foreground text-center py-8">
+                    Start chatting to analyze your digital trajectory. More than 5 messages are needed.
+                </p>
+            )}
+          </CardContent>
+        </Card>
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         <Card className="lg:col-span-4">
           <CardHeader>
