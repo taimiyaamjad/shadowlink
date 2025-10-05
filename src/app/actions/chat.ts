@@ -84,10 +84,10 @@ export async function sendMessage(
       });
     }
 
-    // Trigger AI response generation in the background (don't await it here)
-    generateAndAddAiResponse(uid, currentConversationId, messageText);
+    // Await the AI response generation
+    await generateAndAddAiResponse(uid, currentConversationId, messageText);
     
-    // Return immediately so the UI can redirect
+    // Return after AI has responded
     return { success: true, conversationId: currentConversationId };
 
   } catch (error) {
@@ -97,7 +97,7 @@ export async function sendMessage(
   }
 }
 
-// This function runs in the background and does not block the initial user message.
+// This function now runs as part of the main sendMessage flow.
 async function generateAndAddAiResponse(uid: string, conversationId: string, latestMessage: string) {
     const { db } = getFirebaseInstances();
     if (!db) return;
@@ -147,6 +147,16 @@ async function generateAndAddAiResponse(uid: string, conversationId: string, lat
         console.error("Error generating or saving AI response:", error);
         // Optionally, you could add an error message to the chat here
         // to let the user know something went wrong with the AI response.
+        const conversationRef = doc(db, 'conversations', conversationId);
+        const errorMessage: Omit<Message, 'id'> = {
+            text: "Sorry, I encountered an error and couldn't respond.",
+            sender: 'ai',
+            createdAt: Timestamp.now()
+        };
+        await updateDoc(conversationRef, {
+            messages: arrayUnion(errorMessage),
+            lastMessageAt: serverTimestamp()
+        });
     }
 }
 

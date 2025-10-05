@@ -37,23 +37,20 @@ export function ChatArea() {
 
   useEffect(() => {
     if (conversationId && db) {
-      setIsAiThinking(true);
       const unsub = onSnapshot(doc(db, "conversations", conversationId), (doc) => {
         if (doc.exists()) {
           const data = doc.data();
           const currentMessages = data.messages || [];
           setMessages(currentMessages);
-
-          // Check if the last message is from the user
-          if (currentMessages.length > 0 && currentMessages[currentMessages.length - 1].sender === 'user') {
-            setIsAiThinking(true);
-          } else {
-            setIsAiThinking(false);
-          }
+          setIsAiThinking(false);
         } else {
           toast({ variant: 'destructive', title: 'Error', description: 'Conversation not found.' });
           router.push('/chat/dashboard');
         }
+      }, (error) => {
+        console.error("Error listening to conversation:", error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not load conversation.' });
+        router.push('/chat/dashboard');
       });
       return () => unsub();
     } else {
@@ -75,9 +72,11 @@ export function ChatArea() {
     };
     
     setIsSending(true);
-    if (isNewChat) {
+    setIsAiThinking(true);
+    
+    // Optimistically update UI for new chats
+    if (!conversationId) {
       setMessages((prev) => [...prev, userMessage]);
-      setIsAiThinking(true);
     }
     
     const currentInput = input;
@@ -100,12 +99,12 @@ export function ChatArea() {
         description: (error as Error).message,
       });
       // Revert optimistic update only if it was a new chat
-      if(isNewChat) {
+      if(!conversationId) {
         setMessages(prev => prev.filter(m => m.id !== tempUserMessageId));
-        setIsAiThinking(false);
       }
     } finally {
         setIsSending(false);
+        setIsAiThinking(false);
     }
   };
   
